@@ -8,6 +8,8 @@
 #include <vtkm/cont/DataSetBuilderRectilinear.h>
 #include <vtkm/cont/Invoker.h>
 
+#include <vtkm/io/VTKDataSetReader.h>
+
 #include <vtkm/worklet/WorkletMapField.h>
 
 namespace data {
@@ -388,18 +390,35 @@ template <typename Array> void Print5(Array array) {
   std::cout << std::endl;
 }
 
-vtkm::cont::DataSet MakeData() {
-  vtkm::cont::DataSet data;
+vtkm::cont::DataSet MakeData(std::string dataset) {
+
+  vtkm::io::VTKDataSetReader reader(dataset);
+  vtkm::cont::DataSet data = reader.ReadDataSet();;
+
+  for(int i = 0; i < data.GetNumberOfFields(); i++)
+  {
+    auto field = data.GetField(i);
+    std::cout << field.GetName() << std::endl;
+  }
+
   using IdArray = vtkm::cont::ArrayHandle<vtkm::Id>;
   using DataArray = vtkm::cont::ArrayHandle<vtkm::FloatDefault>;
-  DataArray backArr =
-      vtkm::cont::make_ArrayHandle(BackVec, vtkm::CopyFlag::Off);
-  DataArray cirAArr =
-      vtkm::cont::make_ArrayHandle(CirAVec, vtkm::CopyFlag::Off);
-  DataArray cirBArr =
-      vtkm::cont::make_ArrayHandle(CirBVec, vtkm::CopyFlag::Off);
-  DataArray cirCArr =
-      vtkm::cont::make_ArrayHandle(CirCVec, vtkm::CopyFlag::Off);
+  DataArray backArr;
+  data.GetField("mesh_topo/background").GetData().AsArrayHandle(backArr);
+  DataArray cirAArr;
+  data.GetField("mesh_topo/circle_a").GetData().AsArrayHandle(cirAArr);
+  DataArray cirBArr;
+  data.GetField("mesh_topo/circle_b").GetData().AsArrayHandle(cirBArr);
+  DataArray cirCArr;
+  data.GetField("mesh_topo/circle_c").GetData().AsArrayHandle(cirCArr);
+//  DataArray backArr =
+//      vtkm::cont::make_ArrayHandle(BackVec, vtkm::CopyFlag::Off);
+//  DataArray cirAArr =
+//      vtkm::cont::make_ArrayHandle(CirAVec, vtkm::CopyFlag::Off);
+//  DataArray cirBArr =
+//      vtkm::cont::make_ArrayHandle(CirBVec, vtkm::CopyFlag::Off);
+//  DataArray cirCArr =
+//      vtkm::cont::make_ArrayHandle(CirCVec, vtkm::CopyFlag::Off);
 
   IdArray length;
   IdArray offset;
@@ -428,8 +447,8 @@ vtkm::cont::DataSet MakeData() {
   std::cerr << "IDs : " << matIds.GetNumberOfValues() << std::endl;
   std::cerr << "VFs : " << matVFs.GetNumberOfValues() << std::endl;
 
-  vtkm::cont::DataSetBuilderRectilinear dataSetBuilder;
-  data = dataSetBuilder.Create(XCoords, YCoords, "coords");
+  //vtkm::cont::DataSetBuilderRectilinear dataSetBuilder;
+  //data = dataSetBuilder.Create(XCoords, YCoords, "coords");
 
   data.AddField(vtkm::cont::Field("scatter_pos", vtkm::cont::Field::Association::CELL_SET, offset));
   data.AddField(vtkm::cont::Field("scatter_len", vtkm::cont::Field::Association::CELL_SET, length));

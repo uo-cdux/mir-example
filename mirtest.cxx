@@ -8,7 +8,12 @@
 
 int main(int argc, char** argv)
 {
-  vtkm::cont::DataSet ds = data::MakeData();
+  if(argc < 2)
+    exit(EXIT_FAILURE);
+
+  std::string dataset(argv[1]);
+  std::cout << "Reading data from : " << dataset << std::endl;
+  vtkm::cont::DataSet ds = data::MakeData(dataset);
   std::cerr << "Cells : " << ds.GetNumberOfCells() << std::endl;
   std::cerr << "Points : " << ds.GetNumberOfPoints() << std::endl;
 
