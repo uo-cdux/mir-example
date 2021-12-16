@@ -11,11 +11,15 @@ cmake_minimum_required(VERSION 3.8...3.15 FATAL_ERROR)
 
 project(mirtest CXX)
 
+# Boost
+FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+
 # Find the VTK-m package
 find_package(VTKm REQUIRED QUIET)
 
 add_executable(mirtest mirtest.cxx makedata.h)
-target_link_libraries(mirtest PRIVATE vtkm_cont vtkm_filter vtkm_io)
+target_link_libraries(mirtest PRIVATE vtkm_cont vtkm_filter vtkm_io ${Boost_LIBRARIES})
 vtkm_add_target_information(mirtest
                             DROP_UNUSED_SYMBOLS MODIFY_CUDA_FLAGS
                             DEVICE_SOURCES mirtest.cxx)
